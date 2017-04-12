@@ -1,4 +1,13 @@
 ui: tape
+concurrency: 1
 browsers:
+  - name: firefox
+    version: latest
+  - name: safari
+    version: 8..latest
   - name: iphone
-    version: 8
+    version: [8.1, 9.0, 10.0]
+  - name: microsoftedge
+    version: latest
+  - name: android:
+    version: 5.0..latest
