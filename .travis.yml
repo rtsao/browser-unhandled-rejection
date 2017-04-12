@@ -1,0 +1,4 @@
+language: node_js
+node_js:
+- 6
+script: if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then npm run travis-test-browser; fi

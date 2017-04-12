@@ -1,0 +1,4 @@
+ui: tape
+browsers:
+  - name: iPhone
+    version: '7.1..latest'
