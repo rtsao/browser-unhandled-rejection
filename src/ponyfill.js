@@ -1,8 +1,7 @@
 const OriginalPromise = window.Promise;
 
 /**
- * ES5 subclassing is used because native Promise is
- * not subclassable in certain browsers per:
+ * ES5 subclassing is used because Promise might not be is not subclassable:
  * https://kangax.github.io/compat-table/es6/#test-Promise_is_subclassable
  * 
  * Adapted from: https://gist.github.com/domenic/8ed6048b187ee8f2ec75
@@ -23,8 +22,10 @@ const InstrumentedPromise = function Promise(resolver) {
   promise.__proto__ = InstrumentedPromise.prototype;
   return promise;
 };
+
 InstrumentedPromise.__proto__ = OriginalPromise;
 InstrumentedPromise.prototype.__proto__ = OriginalPromise.prototype;
+
 InstrumentedPromise.prototype.then = function then(onFulfilled, onRejected) {
   return OriginalPromise.prototype.then.call(this, onFulfilled, arg => {
     this._handled = true;
