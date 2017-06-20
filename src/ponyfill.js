@@ -28,10 +28,10 @@ InstrumentedPromise.__proto__ = OriginalPromise;
 InstrumentedPromise.prototype.__proto__ = OriginalPromise.prototype;
 
 InstrumentedPromise.prototype.then = function then(onFulfilled, onRejected) {
-  return OriginalPromise.prototype.then.call(this, onFulfilled, onRejected && arg => {
+  return OriginalPromise.prototype.then.call(this, onFulfilled, onRejected && (arg => {
     this._handled = true;
     return onRejected(arg);
-  });
+  }));
 };
 
 function dispatchUnhandledRejectionEvent(promise, reason) {
