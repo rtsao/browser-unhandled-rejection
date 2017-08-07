@@ -18,5 +18,5 @@ test('auto polyfill works', t => {
   }
   window.addEventListener('unhandledrejection', listener);
   auto();
-  promise = Promise.reject(reason);
+  promise = Promise.reject(reason).then();
 });

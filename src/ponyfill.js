@@ -13,16 +13,11 @@ const InstrumentedPromise = function Promise(resolver) {
   }
   const promise = new OriginalPromise((resolve, reject) =>
     resolver(resolve, arg => {
-      OriginalPromise.resolve().then(() => {
-        if (promise._handled !== true) {
-          if (promise._rejected !== true) {
-            promise._rejected = true;
-            dispatchUnhandledRejectionEvent(promise, arg);
-          }
-        }
-      });
+      promise._rejected = true;
+      promise._error = arg;
       return reject(arg);
-    }));
+    })
+  );
   promise.__proto__ = InstrumentedPromise.prototype;
   return promise;
 };
@@ -31,10 +26,23 @@ InstrumentedPromise.__proto__ = OriginalPromise;
 InstrumentedPromise.prototype.__proto__ = OriginalPromise.prototype;
 
 InstrumentedPromise.prototype.then = function then(onFulfilled, onRejected) {
-  return OriginalPromise.prototype.then.call(this, onFulfilled, arg => {
-    this._handled = true;
-    return onRejected(arg);
+  let handled = false;
+  const result = OriginalPromise.prototype.then.call(
+    this,
+    onFulfilled,
+    onRejected
+      ? arg => {
+          handled = true;
+          return onRejected(arg);
+        }
+      : onRejected
+  );
+  OriginalPromise.resolve().then(() => {
+    if (this._rejected === true && handled === false) {
+      dispatchUnhandledRejectionEvent(result, this._error);
+    }
   });
+  return result;
 };
 
 function dispatchUnhandledRejectionEvent(promise, reason) {

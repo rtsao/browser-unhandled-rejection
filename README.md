@@ -48,11 +48,13 @@ window.addEventListener('unhandledrejection', () => {
   console.log('unhandledrejection was triggered');
 });
 
-MyPromise.reject('will trigger unhandledrejection event');
+const p1 = MyPromise.reject();
+p1.then(); // will trigger unhandledrejection event
 
-new MyPromise((resolve, reject) => {
-  reject('will also trigger unhandledrejection event');
+const p2 = new MyPromise((resolve, reject) => {
+  reject();
 });
+p2.then(); // will also trigger unhandledrejection event
 ```
 
 [npm-badge]: https://badge.fury.io/js/browser-unhandled-rejection.svg
