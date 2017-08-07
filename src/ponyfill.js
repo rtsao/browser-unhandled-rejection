@@ -15,7 +15,10 @@ const InstrumentedPromise = function Promise(resolver) {
     resolver(resolve, arg => {
       OriginalPromise.resolve().then(() => {
         if (promise._handled !== true) {
-          dispatchUnhandledRejectionEvent(promise, arg);
+          if (promise._rejected !== true) {
+            promise._rejected = true;
+            dispatchUnhandledRejectionEvent(promise, arg);
+          }
         }
       });
       return reject(arg);
