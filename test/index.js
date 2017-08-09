@@ -1,6 +1,12 @@
 import Ponyfill, {auto, needsPolyfill} from '../src/index.js';
 import test from 'tape';
 
+// macrotask (setTimeout) runs after microtask (Promise.resolve)
+function macrotask(fn) {
+  // 200 because 0 is flaky with Safari 10.0.x
+  setTimeout(fn, 200);
+}
+
 function runTestSuite(MyPromise, name) {
   test(`rejection is handled per leaf (${name})`, t => {
     t.plan(1);
@@ -12,11 +18,10 @@ function runTestSuite(MyPromise, name) {
     const promise = MyPromise.reject(new Error('rejection'));
     promise.then(() => {}).then(() => {}).then(() => {});
     promise.then(() => {}).then(() => {}).then(() => {});
-    //macro-task(setTimeout) runs after microtask (Promise.resolve)
-    setTimeout(() => {
+    macrotask(() => {
       t.equal(count, 2, 'handler is called twice');
       window.removeEventListener('unhandledrejection', listener);
-    }, 0);
+    });
   });
 
   test(`rejection of non-error works (${name})`, t => {
@@ -30,11 +35,10 @@ function runTestSuite(MyPromise, name) {
     window.addEventListener('unhandledrejection', listener);
     const promise = MyPromise.reject(reason);
     promise.then(() => {}).then(() => {});
-    // macrotask (setTimeout) runs after microtask (Promise.resolve)
-    setTimeout(() => {
+    macrotask(() => {
       t.equal(count, 1, 'handler is called');
       window.removeEventListener('unhandledrejection', listener);
-    }, 0);
+    });
   });
 
   test(`does not trigger event for recovered downstream (${name})`, t => {
@@ -47,11 +51,10 @@ function runTestSuite(MyPromise, name) {
     window.addEventListener('unhandledrejection', listener);
     const promise = MyPromise.reject(reason);
     promise.catch(() => {}).then(() => {});
-    // macrotask (setTimeout) runs after microtask (Promise.resolve)
-    setTimeout(() => {
+    macrotask(() => {
       t.equal(count, 0, 'handler is not called');
       window.removeEventListener('unhandledrejection', listener);
-    }, 0);
+    });
   });
 
   test(`unhandledrejection event shape (${name})`, t => {
