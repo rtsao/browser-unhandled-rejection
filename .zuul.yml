@@ -5,11 +5,11 @@ browsers:
     version: latest
   - name: firefox
     version: latest
-  - name: safari
-    version: 8..latest
-  - name: iphone
-    version: [8.1, 9.0, 10.0]
   - name: microsoftedge
     version: latest
   - name: android:
     version: 5.0..latest
+  - name: iphone
+    version: [8.1, 9.0, 10.0]
+  - name: safari
+    version: 8..latest
