@@ -34,28 +34,26 @@ InstrumentedPromise.prototype.then = function then(onFulfilled, onRejected) {
 };
 
 function dispatchUnhandledRejectionEvent(promise, reason) {
-  if (typeof window !== 'undefined') {
-    const event = document.createEvent('Event');
-    /**
-     * Note: these properties should not be enumerable, which is the default setting
-     */
-    Object.defineProperties(event, {
-      promise: {
-        value: promise,
-        writable: false
-      },
-      reason: {
-        value: reason,
-        writable: false
-      }
-    });
-    event.initEvent(
-      'unhandledrejection', // Define that the event name is 'unhandledrejection'
-      false, // PromiseRejectionEvent is not bubbleable
-      true // PromiseRejectionEvent is cancelable
-    );
-    window.dispatchEvent(event);
-  }
+  const event = document.createEvent('Event');
+  /**
+   * Note: these properties should not be enumerable, which is the default setting
+   */
+  Object.defineProperties(event, {
+    promise: {
+      value: promise,
+      writable: false
+    },
+    reason: {
+      value: reason,
+      writable: false
+    }
+  });
+  event.initEvent(
+    'unhandledrejection', // Define that the event name is 'unhandledrejection'
+    false, // PromiseRejectionEvent is not bubbleable
+    true // PromiseRejectionEvent is cancelable
+  );
+  window.dispatchEvent(event);
 }
 
 export default InstrumentedPromise;
