@@ -1,4 +1,4 @@
-const OriginalPromise = window.Promise;
+const OriginalPromise = Promise;
 
 /**
  * ES5 subclassing is used per:
@@ -14,7 +14,7 @@ const InstrumentedPromise = function Promise(resolver) {
   const promise = new OriginalPromise((resolve, reject) =>
     resolver(resolve, arg => {
       OriginalPromise.resolve().then(() => {
-        if (promise._handled !== true) {
+        if (promise._hasDownstreams === undefined) {
           dispatchUnhandledRejectionEvent(promise, arg);
         }
       });
@@ -28,33 +28,34 @@ InstrumentedPromise.__proto__ = OriginalPromise;
 InstrumentedPromise.prototype.__proto__ = OriginalPromise.prototype;
 
 InstrumentedPromise.prototype.then = function then(onFulfilled, onRejected) {
-  return OriginalPromise.prototype.then.call(this, onFulfilled, arg => {
-    this._handled = true;
-    return onRejected(arg);
-  });
+  const next = OriginalPromise.prototype.then.call(this, onFulfilled, onRejected);
+  this._hasDownstreams = true;
+  return next;
 };
 
 function dispatchUnhandledRejectionEvent(promise, reason) {
-  const event = document.createEvent('Event');
-  /**
-   * Note: these properties should not be enumerable, which is the default setting
-   */
-  Object.defineProperties(event, {
-    promise: {
-      value: promise,
-      writable: false
-    },
-    reason: {
-      value: reason,
-      writable: false
-    }
-  });
-  event.initEvent(
-    'unhandledrejection', // Define that the event name is 'unhandledrejection'
-    false, // PromiseRejectionEvent is not bubbleable
-    true // PromiseRejectionEvent is cancelable
-  );
-  window.dispatchEvent(event);
+  if (typeof window !== 'undefined') {
+    const event = document.createEvent('Event');
+    /**
+     * Note: these properties should not be enumerable, which is the default setting
+     */
+    Object.defineProperties(event, {
+      promise: {
+        value: promise,
+        writable: false
+      },
+      reason: {
+        value: reason,
+        writable: false
+      }
+    });
+    event.initEvent(
+      'unhandledrejection', // Define that the event name is 'unhandledrejection'
+      false, // PromiseRejectionEvent is not bubbleable
+      true // PromiseRejectionEvent is cancelable
+    );
+    window.dispatchEvent(event);
+  }
 }
 
 export default InstrumentedPromise;

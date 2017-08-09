@@ -20,3 +20,40 @@ test('auto polyfill works', t => {
   auto();
   promise = Promise.reject(reason);
 });
+
+test('rejection is handled per leaf', t => {
+  t.plan(1);
+  let count = 0;
+  const listener = () => {
+    count++;
+  }
+  window.addEventListener('unhandledrejection', listener);
+  auto();
+  const promise = Promise.reject(new Error('rejection'));
+  promise.then(() => {}).then(() => {}).then(() => {});
+  promise.then(() => {}).then(() => {}).then(() => {});
+  //macro-task(setTimeout) runs after microtask (Promise.resolve)
+  setTimeout(() => {
+    t.equal(count, 2, 'handler is called twice');
+    window.removeEventListener('unhandledrejection', listener);
+  }, 0);
+});
+
+test('rejection of non-error works', t => {
+  t.plan(2);
+  let count = 0;
+  const reason = 'rejection';
+  const listener = (e) => {
+    count++;
+    t.equal(e.reason, reason, 'reason attribute matches expected value');
+  }
+  window.addEventListener('unhandledrejection', listener);
+  auto();
+  const promise = Promise.reject(reason);
+  promise.then(() => {}).then(() => {});
+  //macro-task(setTimeout) runs after microtask (Promise.resolve)
+  setTimeout(() => {
+    t.equal(count, 1, 'handler is called');
+    window.removeEventListener('unhandledrejection', listener);
+  }, 0);
+});
