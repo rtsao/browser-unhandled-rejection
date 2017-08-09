@@ -57,3 +57,22 @@ test('rejection of non-error works', t => {
     window.removeEventListener('unhandledrejection', listener);
   }, 0);
 });
+
+
+test('does not trigger event for recovered downstream', t => {
+  t.plan(1);
+  let count = 0;
+  const reason = 'rejection';
+  const listener = (e) => {
+    count++;
+  }
+  window.addEventListener('unhandledrejection', listener);
+  auto();
+  const promise = Promise.reject(reason);
+  promise.catch(() => {}).then(() => {});
+  //macro-task(setTimeout) runs after microtask (Promise.resolve)
+  setTimeout(() => {
+    t.equal(count, 0, 'handler is not called');
+    window.removeEventListener('unhandledrejection', listener);
+  }, 0);
+});
