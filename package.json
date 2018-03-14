@@ -8,6 +8,10 @@
   "bugs": "https://github.com/rtsao/browser-unhandled-rejection/issues",
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.es.js",
+  "files": [
+    "dist/bundle.cjs.js",
+    "dist/bundle.es.js"
+  ],
   "scripts": {
     "prepublish": "npm run build",
     "pretest": "npm run build-test",
